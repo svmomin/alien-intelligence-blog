@@ -2,90 +2,139 @@ import fs from "fs";
 import Parser from "rss-parser";
 import slugify from "slugify";
 
-const parser = new Parser();
+const parser = new Parser({ timeout: 10000 });
 
 const FEEDS = [
 
-  "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EGSPC,%5EDJI,%5EIXIC&region=US&lang=en-US",
-  "https://www.cnbc.com/id/100003114/device/rss/rss.html",
-  "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
-
-  "https://cointelegraph.com/rss",
-  "https://www.coindesk.com/arc/outboundfeeds/rss/",
-
-  "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
-  "https://feeds.bbci.co.uk/news/world/rss.xml",
-
-  "https://feeds.arstechnica.com/arstechnica/index",
-  "https://www.theverge.com/rss/index.xml"
+  { url: "https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5EGSPC,%5EDJI,%5EIXIC&region=US&lang=en-US", category: "Markets" },
+  { url: "https://cointelegraph.com/rss", category: "Crypto" },
+  { url: "https://feeds.bbci.co.uk/news/world/rss.xml", category: "World" },
+  { url: "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml", category: "Politics" },
+  { url: "https://feeds.arstechnica.com/arstechnica/index", category: "Technology" }
 
 ];
-
-function alienInterpretation(title) {
-
-  const probability = (Math.random() * 100).toFixed(2);
-
-  return `
-<h2>Alien Intelligence Assessment</h2>
-
-<p>Monitoring human activity related to:</p>
-
-<p><strong>${title}</strong></p>
-
-<p>Global instability probability increased to ${probability}%</p>
-
-<p>Surveillance continues.</p>
-`;
-}
 
 function getToday() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function generateAnalysis(item, category) {
+
+  const impactScore = (Math.random() * 100).toFixed(0);
+  const volatility = (Math.random() * 10).toFixed(2);
+
+  return `
+<div class="intel-card">
+
+<div class="intel-header">
+<span class="intel-category">${category}</span>
+<h3>${item.title}</h3>
+</div>
+
+<div class="intel-summary">
+<p>${item.contentSnippet || "No summary available."}</p>
+</div>
+
+<div class="intel-analysis">
+
+<h4>Human Intelligence Analysis</h4>
+
+<p>
+This event indicates structural movement within the ${category.toLowerCase()} domain.
+Patterns suggest increasing acceleration in global system dynamics.
+</p>
+
+<p>
+Impact Score: <strong>${impactScore}/100</strong><br>
+Volatility Index: <strong>${volatility}</strong>
+</p>
+
+</div>
+
+<a href="${item.link}" target="_blank">View Source</a>
+
+</div>
+`;
+}
+
+function alienAssessment(items) {
+
+  const threatLevel = (Math.random() * 100).toFixed(0);
+
+  return `
+<div class="alien-assessment">
+
+<h2>Alien Intelligence Assessment</h2>
+
+<p>
+Human civilization entering accelerated transition phase.
+Observed increase in economic and technological instability.
+</p>
+
+<p>
+Threat Level: <strong>${threatLevel}%</strong>
+</p>
+
+<p>
+Probability of major global structural shift rising.
+Monitoring continues.
+</p>
+
+</div>
+`;
+}
+
 (async () => {
 
-  let items = [];
+  let collected = [];
 
-  for (const url of FEEDS) {
+  for (const feed of FEEDS) {
+
     try {
-      const feed = await parser.parseURL(url);
-      items = items.concat(feed.items.slice(0, 2));
+
+      const result = await parser.parseURL(feed.url);
+
+      result.items.slice(0, 2).forEach(item => {
+
+        collected.push({
+          ...item,
+          category: feed.category
+        });
+
+      });
+
     } catch {}
+
   }
 
-  if (!items.length) return;
+  if (!collected.length) return;
 
-  const shuffled = items.sort(() => 0.5 - Math.random());
-  const topItems = shuffled.slice(0, 5);
+  const shuffled = collected.sort(() => 0.5 - Math.random());
 
-  const today = getToday();
+  const selected = shuffled.slice(0, 6);
 
-  const title = `Alien Intelligence Briefing - ${today}`;
+  let body = `<h2>Global Intelligence Briefing</h2>`;
 
-  let body = `<h2>Global Intelligence Summary</h2>`;
+  selected.forEach(item => {
 
-  topItems.forEach(item => {
-
-    body += `
-<h3>${item.title}</h3>
-
-<p>${item.contentSnippet || ""}</p>
-
-<p><a href="${item.link}">Source</a></p>
-`;
+    body += generateAnalysis(item, item.category);
 
   });
 
-  body += alienInterpretation(topItems[0].title);
+  body += alienAssessment(selected);
 
-  const slug = slugify(`${today}-alien-briefing`, { lower: true });
+  const today = getToday();
+
+  const slug = slugify(`${today}-global-intelligence`, { lower: true });
 
   if (!fs.existsSync("src/posts")) {
+
     fs.mkdirSync("src/posts", { recursive: true });
+
   }
 
   const content = `---
-title: "${title}"
+title: "Global Intelligence Briefing - ${today}"
 layout: layout.njk
 date: "${today}"
 ---
@@ -93,8 +142,24 @@ date: "${today}"
 ${body}
 `;
 
+const existing = fs.readdirSync("src/posts");
+
+if (existing.length > 0) {
+
+  const latest = existing[existing.length - 1];
+
+  if (latest.includes(today)) {
+
+    console.log("Post already exists today");
+
+    return;
+
+  }
+
+}
+
   fs.writeFileSync(`src/posts/${slug}.md`, content);
 
-  console.log("Post created");
+  console.log("Intelligence briefing created");
 
 })();
