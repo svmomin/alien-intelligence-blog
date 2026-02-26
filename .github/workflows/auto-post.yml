@@ -1,0 +1,33 @@
+name: Alien Intelligence Auto Post
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"   # every 3 hours
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate alien post
+        run: node scripts/generate-post.js
+
+      - name: Commit and push
+        run: |
+          git config user.name "alien-bot"
+          git config user.email "alien@intelligence.bot"
+          git add src/posts
+          git commit -m "Auto alien intelligence post" || echo "No changes"
+          git push
