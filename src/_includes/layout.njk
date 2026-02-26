@@ -3,6 +3,8 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>{{ title }}</title>
 
 <style>
@@ -10,42 +12,79 @@
 body {
   background: #070b12;
   color: #d6e2ff;
-  font-family: system-ui;
+  font-family: system-ui, Arial;
   max-width: 900px;
   margin: auto;
   padding: 20px;
 }
 
-h1 {
+/* HEADER */
+.site-header {
+  border-bottom: 1px solid #1f2a3a;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+}
+
+/* CLICKABLE SITE TITLE */
+.site-title {
+  color: #00ffaa;
+  text-decoration: none;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.site-title:hover {
+  color: #00cc88;
+}
+
+/* NAVIGATION */
+.site-nav {
+  margin-top: 8px;
+}
+
+.site-nav a {
+  color: #8fb3ff;
+  text-decoration: none;
+  margin-right: 15px;
+  font-size: 14px;
+}
+
+.site-nav a:hover {
   color: #00ffaa;
 }
 
+/* INTEL CARDS */
 .intel-card {
-
   background: #0f1624;
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 10px;
-
+  border: 1px solid #1c2940;
 }
 
 .intel-category {
-
   background: #00ffaa;
   color: black;
-  padding: 4px 8px;
-  border-radius: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
   font-size: 12px;
-
 }
 
-.alien-assessment {
+.intel-card h3 {
+  margin-top: 8px;
+}
 
+.intel-card a {
+  color: #00ffaa;
+}
+
+/* ALIEN ASSESSMENT */
+.alien-assessment {
   background: #1a0f2e;
   padding: 20px;
   border-radius: 10px;
   margin-top: 30px;
-
+  border: 1px solid #3a1f6b;
 }
 
 </style>
@@ -54,9 +93,24 @@ h1 {
 
 <body>
 
-<h1>Alien Intelligence Network</h1>
+<header class="site-header">
+
+  <!-- CLICKABLE HOME LINK -->
+  <a href="/" class="site-title">
+    Alien Intelligence Network
+  </a>
+
+  <div class="site-nav">
+    <a href="/">Home</a>
+  </div>
+
+</header>
+
+<main>
 
 {{ content | safe }}
+
+</main>
 
 </body>
 </html>
