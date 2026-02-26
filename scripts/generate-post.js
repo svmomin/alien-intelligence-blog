@@ -21,50 +21,72 @@ function getToday() {
 
 async function generateDashboardMetrics(selectedNews) {
 
-  let vix = 18;
-  let btcVol = 3.5;
+  let vix = null;
+  let btcVol = null;
 
   try {
-    const vixRes = await axios.get(
-      "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX",
-      { timeout: 10000 }
-    );
 
-    if (vixRes.data?.quoteResponse?.result?.length > 0) {
-      vix = vixRes.data.quoteResponse.result[0].regularMarketPrice;
-    }
+   const vixRes = await axios.get(
+  "https://query2.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX",
+  {
+    timeout: 15000,
+    headers: {
+      "User-Agent": "Mozilla/5.0",
+      "Accept": "application/json"
+     }
+   }
+  );
 
-  } catch {
-    console.log("VIX fetch failed, fallback used");
+    vix = vixRes.data.quoteResponse.result[0].regularMarketPrice;
+
+    console.log("REAL VIX:", vix);
+
+  } catch (err) {
+
+    console.log("VIX error:", err.message);
+
+    // fallback ONLY if API fails
+    vix = 20 + Math.random() * 5;
+
   }
 
   try {
+
     const btcRes = await axios.get(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
-      { timeout: 10000 }
+      "https://api.coingecko.com/api/v3/coins/bitcoin",
+      { timeout: 15000 }
     );
 
-    if (btcRes.data?.bitcoin?.usd_24h_change !== undefined) {
-      btcVol = Math.abs(btcRes.data.bitcoin.usd_24h_change);
-    }
+    btcVol =
+      btcRes.data.market_data.price_change_percentage_24h;
 
-  } catch {
-    console.log("BTC fetch failed, fallback used");
+    console.log("REAL BTC VOL:", btcVol);
+
+  } catch (err) {
+
+    console.log("BTC error:", err.message);
+
+    btcVol = 3 + Math.random() * 5;
+
   }
 
-  const globalStability = Math.max(100 - vix, 10).toFixed(0);
+  const globalStability = Math.max(100 - vix, 5).toFixed(0);
 
   let marketRisk = "LOW";
+
   if (vix > 25) marketRisk = "HIGH";
   else if (vix > 18) marketRisk = "MODERATE";
 
   return {
+
     globalStability,
     marketRisk,
     stockVolatility: vix.toFixed(2),
-    cryptoVolatility: btcVol.toFixed(2),
-    latestAlert: selectedNews?.[0]?.title || "No alert available"
+    cryptoVolatility: Math.abs(btcVol).toFixed(2),
+    latestAlert: selectedNews?.[0]?.title || "No alert"
+
   };
+
 }
 
 (async () => {
@@ -101,14 +123,28 @@ async function generateDashboardMetrics(selectedNews) {
 
     const dashboard = await generateDashboardMetrics(selected);
 
-    if (!fs.existsSync("src/_data")) {
-      fs.mkdirSync("src/_data", { recursive: true });
-    }
+if (!fs.existsSync("src/_data")) {
+  fs.mkdirSync("src/_data", { recursive: true });
+}
 
-    fs.writeFileSync(
-      "src/_data/dashboard.json",
-      JSON.stringify(dashboard, null, 2)
-    );
+// FORCE update with timestamp and runId
+
+const dashboardWithTimestamp = {
+
+  ...dashboard,
+
+  updated: new Date().toISOString(),
+
+  runId: Date.now()
+
+};
+
+fs.writeFileSync(
+  "src/_data/dashboard.json",
+  JSON.stringify(dashboardWithTimestamp, null, 2)
+);
+
+console.log("Dashboard updated:", dashboardWithTimestamp);
 
     let body = `<h2>Global Intelligence Briefing</h2>`;
 
