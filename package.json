@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-  "dev": "node ./node_modules/@11ty/eleventy/cmd.js --serve",
-  "build": "node ./node_modules/@11ty/eleventy/cmd.js",
-  "gen": "node scripts/generate-post.js"
-},
+    "dev": "node ./node_modules/@11ty/eleventy/cmd.js --serve",
+    "build": "node ./node_modules/@11ty/eleventy/cmd.js",
+    "gen": "node scripts/generate-post.js"
+  },
   "dependencies": {
     "@11ty/eleventy": "^2.0.1",
+    "axios": "^1.13.5",
     "rss-parser": "^3.13.0",
     "slugify": "^1.6.6"
   }

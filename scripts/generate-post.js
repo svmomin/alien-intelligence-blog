@@ -1,27 +1,45 @@
+import axios from "axios";
 import fs from "fs";
 import Parser from "rss-parser";
 import slugify from "slugify";
 
-function generateDashboardMetrics(selectedNews) {
 
-  const globalStability = Math.floor(Math.random() * 40) + 50; // 50–90
+async function generateDashboardMetrics(selectedNews) {
+
+  // REAL VIX data
+  const vixRes = await axios.get(
+    "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX"
+  );
+
+  const vix = vixRes.data.quoteResponse.result[0].regularMarketPrice;
+
+  // REAL BTC volatility proxy using BTC price change
+  const btcRes = await axios.get(
+    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true"
+  );
+
+  const btcVol = Math.abs(
+    btcRes.data.bitcoin.usd_24h_change
+  ).toFixed(2);
+
+  // Convert VIX → stability
+  const globalStability = Math.max(100 - vix, 10).toFixed(0);
 
   let marketRisk = "LOW";
-  if (globalStability < 60) marketRisk = "HIGH";
-  else if (globalStability < 75) marketRisk = "MODERATE";
 
-  const stockVolatility = (Math.random() * 10 + 10).toFixed(2);
-  const cryptoVolatility = (Math.random() * 15 + 20).toFixed(2);
-
-  const latestAlert = selectedNews[0]?.title || "No major alert";
+  if (vix > 25) marketRisk = "HIGH";
+  else if (vix > 18) marketRisk = "MODERATE";
 
   return {
+
     globalStability,
     marketRisk,
-    stockVolatility,
-    cryptoVolatility,
-    latestAlert
+    stockVolatility: vix.toFixed(2),
+    cryptoVolatility: btcVol,
+    latestAlert: selectedNews[0]?.title || "No alert"
+
   };
+
 }
 
 const parser = new Parser({ timeout: 10000 });
