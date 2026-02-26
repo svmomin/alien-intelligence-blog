@@ -6,23 +6,41 @@ import slugify from "slugify";
 
 async function generateDashboardMetrics(selectedNews) {
 
-  // REAL VIX data
-  const vixRes = await axios.get(
-    "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX"
-  );
+  async function generateDashboardMetrics(selectedNews) {
 
-  const vix = vixRes.data.quoteResponse.result[0].regularMarketPrice;
+  let vix = 18;
+  let btcVol = 3.5;
 
-  // REAL BTC volatility proxy using BTC price change
-  const btcRes = await axios.get(
-    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true"
-  );
+  try {
 
-  const btcVol = Math.abs(
-    btcRes.data.bitcoin.usd_24h_change
-  ).toFixed(2);
+    const vixRes = await axios.get(
+      "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX",
+      { timeout: 10000 }
+    );
 
-  // Convert VIX → stability
+    if (vixRes.data?.quoteResponse?.result?.length > 0) {
+      vix = vixRes.data.quoteResponse.result[0].regularMarketPrice;
+    }
+
+  } catch (e) {
+    console.log("VIX fetch failed, using fallback");
+  }
+
+  try {
+
+    const btcRes = await axios.get(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
+      { timeout: 10000 }
+    );
+
+    if (btcRes.data?.bitcoin?.usd_24h_change !== undefined) {
+      btcVol = Math.abs(btcRes.data.bitcoin.usd_24h_change);
+    }
+
+  } catch (e) {
+    console.log("BTC fetch failed, using fallback");
+  }
+
   const globalStability = Math.max(100 - vix, 10).toFixed(0);
 
   let marketRisk = "LOW";
@@ -35,8 +53,8 @@ async function generateDashboardMetrics(selectedNews) {
     globalStability,
     marketRisk,
     stockVolatility: vix.toFixed(2),
-    cryptoVolatility: btcVol,
-    latestAlert: selectedNews[0]?.title || "No alert"
+    cryptoVolatility: btcVol.toFixed(2),
+    latestAlert: selectedNews?.[0]?.title || "No alert available"
 
   };
 
