@@ -2,6 +2,28 @@ import fs from "fs";
 import Parser from "rss-parser";
 import slugify from "slugify";
 
+function generateDashboardMetrics(selectedNews) {
+
+  const globalStability = Math.floor(Math.random() * 40) + 50; // 50–90
+
+  let marketRisk = "LOW";
+  if (globalStability < 60) marketRisk = "HIGH";
+  else if (globalStability < 75) marketRisk = "MODERATE";
+
+  const stockVolatility = (Math.random() * 10 + 10).toFixed(2);
+  const cryptoVolatility = (Math.random() * 15 + 20).toFixed(2);
+
+  const latestAlert = selectedNews[0]?.title || "No major alert";
+
+  return {
+    globalStability,
+    marketRisk,
+    stockVolatility,
+    cryptoVolatility,
+    latestAlert
+  };
+}
+
 const parser = new Parser({ timeout: 10000 });
 
 const FEEDS = [
@@ -112,6 +134,17 @@ Monitoring continues.
   const shuffled = collected.sort(() => 0.5 - Math.random());
 
   const selected = shuffled.slice(0, 6);
+
+const dashboard = generateDashboardMetrics(selected);
+
+if (!fs.existsSync("src/_data")) {
+  fs.mkdirSync("src/_data", { recursive: true });
+}
+
+fs.writeFileSync(
+  "src/_data/dashboard.json",
+  JSON.stringify(dashboard, null, 2)
+);
 
   let body = `<h2>Global Intelligence Briefing</h2>`;
 

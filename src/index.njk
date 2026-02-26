@@ -1,14 +1,45 @@
 ---
 layout: layout.njk
-title: Home
+title: Global Intelligence Dashboard
 ---
 
-<h2>Posts</h2>
+<h2>Global Intelligence Dashboard</h2>
+
+<div class="dashboard-container">
+
+<div class="metric-card">
+<h3>Global Stability Index</h3>
+<p>{{ dashboard.globalStability }}%</p>
+</div>
+
+<div class="metric-card">
+<h3>Market Risk Level</h3>
+<p>{{ dashboard.marketRisk }}</p>
+</div>
+
+<div class="metric-card">
+<h3>Stock Market Volatility Index</h3>
+<p>{{ dashboard.stockVolatility }}</p>
+</div>
+
+<div class="metric-card">
+<h3>Crypto Volatility Index</h3>
+<p>{{ dashboard.cryptoVolatility }}</p>
+</div>
+
+</div>
+
+<div class="alert-box">
+<h3>Latest Intelligence Alert</h3>
+<p>{{ dashboard.latestAlert }}</p>
+</div>
+
+<h2>Recent Intelligence Reports</h2>
 
 <ul>
 {% for post in collections.posts %}
-  <li>
-    <a href="{{ post.url }}">{{ post.data.title }}</a>
-  </li>
+<li>
+<a href="{{ post.url }}">{{ post.data.title }}</a>
+</li>
 {% endfor %}
 </ul>
