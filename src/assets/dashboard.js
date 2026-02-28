@@ -2,7 +2,7 @@ async function updateDashboard() {
 
   try {
 
-    const res = await fetch("/_data/dashboard.json");
+    const res = await fetch("/assets/dashboard.json");
 
     const data = await res.json();
 

@@ -176,6 +176,11 @@ async function generateDashboardMetrics(selectedNews) {
 
     );
 
+    fs.writeFileSync(
+    "src/assets/dashboard.json",
+    JSON.stringify(dashboardWithTimestamp, null, 2)
+   );
+
     console.log("Dashboard updated:", dashboard);
 
     /*
