@@ -7,39 +7,58 @@ title: Global Intelligence Dashboard
 
 <div class="dashboard-container">
 
-<div class="metric-card">
-<h3>Global Stability Index</h3>
-<p>{{ dashboard.globalStability }}%</p>
-</div>
+  <div class="metric-card">
+    <h3>Global Stability Index</h3>
+    <p id="stability">Loading...</p>
+  </div>
 
-<div class="metric-card">
-<h3>Market Risk Level</h3>
-<p>{{ dashboard.marketRisk }}</p>
-</div>
+  <div class="metric-card">
+    <h3>Market Risk Level</h3>
+    <p id="risk">Loading...</p>
+  </div>
 
-<div class="metric-card">
-<h3>Stock Market Volatility Index</h3>
-<p>{{ dashboard.stockVolatility }}</p>
-</div>
+  <div class="metric-card">
+    <h3>Stock Market Volatility Index (VIX)</h3>
+    <p id="stockVol">Loading...</p>
+  </div>
 
-<div class="metric-card">
-<h3>Crypto Volatility Index</h3>
-<p>{{ dashboard.cryptoVolatility }}</p>
-</div>
+  <div class="metric-card">
+    <h3>Crypto Volatility Index (BTC 24h %)</h3>
+    <p id="cryptoVol">Loading...</p>
+  </div>
 
 </div>
 
 <div class="alert-box">
-<h3>Latest Intelligence Alert</h3>
-<p>{{ dashboard.latestAlert }}</p>
+  <h3>Last Updated</h3>
+  <p id="updated">Loading live data...</p>
 </div>
+
+<!-- LIVE DASHBOARD SCRIPT -->
+<script src="/assets/dashboard.js"></script>
+
+<hr>
 
 <h2>Recent Intelligence Reports</h2>
 
-<ul>
-{% for post in collections.posts %}
-<li>
-<a href="{{ post.url }}">{{ post.data.title }}</a>
-</li>
+<div class="intel-reports">
+
+{% for post in collections.posts | reverse %}
+
+  <div class="intel-card">
+
+    <h3>
+      <a href="{{ post.url }}">
+        {{ post.data.title }}
+      </a>
+    </h3>
+
+    <p>
+      Published: {{ post.date | date: "%Y-%m-%d" }}
+    </p>
+
+  </div>
+
 {% endfor %}
-</ul>
+
+</div>
