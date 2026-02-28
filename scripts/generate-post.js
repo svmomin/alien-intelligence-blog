@@ -19,14 +19,10 @@ function getToday() {
   return new Date().toISOString().slice(0, 10);
 }
 
-/*
-  REAL MARKET METRICS ENGINE
-  Pulls live volatility and risk indicators
-*/
 async function generateDashboardMetrics(selectedNews) {
 
-  let vix = 0;
-  let btcVol = 0;
+  let vix = 20;
+  let btcVol = 3;
 
   try {
 
@@ -35,21 +31,16 @@ async function generateDashboardMetrics(selectedNews) {
       {
         timeout: 15000,
         headers: {
-          "User-Agent": "Mozilla/5.0",
-          "Accept": "application/json"
+          "User-Agent": "Mozilla/5.0"
         }
       }
     );
 
     vix = vixRes.data.quoteResponse.result[0].regularMarketPrice;
 
-    console.log("LIVE VIX:", vix);
-
   } catch (err) {
 
     console.log("VIX fetch failed:", err.message);
-
-    vix = 20; // neutral fallback
 
   }
 
@@ -63,13 +54,9 @@ async function generateDashboardMetrics(selectedNews) {
     btcVol =
       btcRes.data.market_data.price_change_percentage_24h;
 
-    console.log("LIVE BTC VOL:", btcVol);
-
   } catch (err) {
 
     console.log("BTC fetch failed:", err.message);
-
-    btcVol = 3;
 
   }
 
@@ -81,25 +68,13 @@ async function generateDashboardMetrics(selectedNews) {
   if (vix > 25) marketRisk = "HIGH";
   else if (vix > 18) marketRisk = "MODERATE";
 
-  let alert = "Markets stable";
-
-  if (vix > 25)
-    alert = "Extreme volatility detected in global markets";
-
-  else if (btcVol > 6)
-    alert = "Crypto market experiencing elevated volatility";
-
-  else if (selectedNews?.length)
-    alert = selectedNews[0].title;
-
   return {
 
     globalStability,
     marketRisk,
     stockVolatility: Number(vix).toFixed(2),
     cryptoVolatility: Math.abs(btcVol).toFixed(2),
-    latestAlert: alert,
-
+    latestAlert: selectedNews?.[0]?.title || "Markets stable",
     updated: new Date().toISOString(),
     runId: Date.now()
 
@@ -107,9 +82,6 @@ async function generateDashboardMetrics(selectedNews) {
 
 }
 
-/*
-  MAIN EXECUTION ENGINE
-*/
 (async () => {
 
   try {
@@ -135,7 +107,7 @@ async function generateDashboardMetrics(selectedNews) {
 
         });
 
-      } catch (err) {
+      } catch {
 
         console.log("Feed failed:", feed.url);
 
@@ -151,52 +123,35 @@ async function generateDashboardMetrics(selectedNews) {
 
     }
 
-    const shuffled =
-      collected.sort(() => 0.5 - Math.random());
+    const selected =
+      collected.sort(() => 0.5 - Math.random()).slice(0, 5);
 
-    const selected = shuffled.slice(0, 5);
-
-    /*
-      UPDATE DASHBOARD DATA
-    */
     const dashboard =
       await generateDashboardMetrics(selected);
 
-    if (!fs.existsSync("src/_data")) {
-
+    // ensure folders exist
+    if (!fs.existsSync("src/_data"))
       fs.mkdirSync("src/_data", { recursive: true });
 
-    }
+    if (!fs.existsSync("src"))
+      fs.mkdirSync("src", { recursive: true });
 
-    // ensure public folder exists
-if (!fs.existsSync("src")) {
-  fs.mkdirSync("src", { recursive: true });
-}
+    // write dashboard files (THIS FIXES EVERYTHING)
+    fs.writeFileSync(
+      "src/_data/dashboard.json",
+      JSON.stringify(dashboard, null, 2)
+    );
 
-// write internal version (Eleventy data)
-if (!fs.existsSync("src/_data")) {
-  fs.mkdirSync("src/_data", { recursive: true });
-}
+    fs.writeFileSync(
+      "src/dashboard.json",
+      JSON.stringify(dashboard, null, 2)
+    );
 
-fs.writeFileSync(
-  "src/_data/dashboard.json",
-  JSON.stringify(dashboardWithTimestamp, null, 2)
-);
+    console.log("Dashboard.json created");
 
-// write PUBLIC version (THIS is the important one)
-fs.writeFileSync(
-  "src/dashboard.json",
-  JSON.stringify(dashboardWithTimestamp, null, 2)
-);
-
-console.log("Dashboard written to public root");
-
-    /*
-      CREATE BLOG POST
-    */
+    // create blog post
     let body = `
 <h2>Global Intelligence Briefing</h2>
-<p>Automated intelligence assessment of global markets, crypto, and geopolitical stability.</p>
 <hr>
 `;
 
@@ -204,23 +159,10 @@ console.log("Dashboard written to public root");
 
       body += `
 <div class="intel-card">
-
-<span class="intel-category">
-${item.category}
-</span>
-
+<span class="intel-category">${item.category}</span>
 <h3>${item.title}</h3>
-
-<p>
-${item.contentSnippet}
-</p>
-
-<p>
-<a href="${item.link}" target="_blank">
-View Source →
-</a>
-</p>
-
+<p>${item.contentSnippet}</p>
+<a href="${item.link}" target="_blank">Source →</a>
 </div>
 `;
 
@@ -231,29 +173,25 @@ View Source →
     const slug =
       slugify(`${today}-briefing`, { lower: true });
 
-    if (!fs.existsSync("src/posts")) {
-
+    if (!fs.existsSync("src/posts"))
       fs.mkdirSync("src/posts", { recursive: true });
 
-    }
+    fs.writeFileSync(
 
-    const content = `---
+      `src/posts/${slug}.md`,
+
+      `---
 title: "Global Intelligence Briefing - ${today}"
 layout: layout.njk
 date: "${today}"
 ---
 
 ${body}
-`;
-
-    fs.writeFileSync(
-
-      `src/posts/${slug}.md`,
-      content
+`
 
     );
 
-    console.log("Intelligence post created:", slug);
+    console.log("Post created");
 
   } catch (err) {
 

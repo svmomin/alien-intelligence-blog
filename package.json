@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node ./node_modules/@11ty/eleventy/cmd.js --serve",
-    "build": "node ./node_modules/@11ty/eleventy/cmd.js",
+    "build": "node scripts/generate-post.js && node ./node_modules/@11ty/eleventy/cmd.js",
     "gen": "node scripts/generate-post.js"
   },
   "dependencies": {
