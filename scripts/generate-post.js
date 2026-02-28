@@ -168,20 +168,28 @@ async function generateDashboardMetrics(selectedNews) {
 
     }
 
-    fs.writeFileSync(
+    // ensure public folder exists
+if (!fs.existsSync("src")) {
+  fs.mkdirSync("src", { recursive: true });
+}
 
-      "src/_data/dashboard.json",
+// write internal version (Eleventy data)
+if (!fs.existsSync("src/_data")) {
+  fs.mkdirSync("src/_data", { recursive: true });
+}
 
-      JSON.stringify(dashboard, null, 2)
+fs.writeFileSync(
+  "src/_data/dashboard.json",
+  JSON.stringify(dashboardWithTimestamp, null, 2)
+);
 
-    );
+// write PUBLIC version (THIS is the important one)
+fs.writeFileSync(
+  "src/dashboard.json",
+  JSON.stringify(dashboardWithTimestamp, null, 2)
+);
 
-    fs.writeFileSync(
-    "src/assets/dashboard.json",
-    JSON.stringify(dashboardWithTimestamp, null, 2)
-   );
-
-    console.log("Dashboard updated:", dashboard);
+console.log("Dashboard written to public root");
 
     /*
       CREATE BLOG POST
