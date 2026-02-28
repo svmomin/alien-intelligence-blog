@@ -34,7 +34,6 @@ title: Global Intelligence Dashboard
   <p id="updated">Loading live data...</p>
 </div>
 
-<!-- LIVE DASHBOARD SCRIPT -->
 <script src="/assets/dashboard.js"></script>
 
 <hr>
@@ -43,7 +42,7 @@ title: Global Intelligence Dashboard
 
 <div class="intel-reports">
 
-{% for post in collections.posts | reverse %}
+{% for post in collections.posts %}
 
   <div class="intel-card">
 
@@ -52,10 +51,6 @@ title: Global Intelligence Dashboard
         {{ post.data.title }}
       </a>
     </h3>
-
-    <p>
-      Published: {{ post.date | date: "%Y-%m-%d" }}
-    </p>
 
   </div>
 
