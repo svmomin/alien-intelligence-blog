@@ -2,51 +2,29 @@ async function updateDashboard() {
 
   try {
 
-    const vixRes = await fetch(
-      "https://query2.finance.yahoo.com/v7/finance/quote?symbols=%5EVIX"
-    );
+    const res = await fetch("/_data/dashboard.json");
 
-    const vixData = await vixRes.json();
-
-    const vix =
-      vixData.quoteResponse.result[0].regularMarketPrice;
-
-    const btcRes = await fetch(
-      "https://api.coingecko.com/api/v3/coins/bitcoin"
-    );
-
-    const btcData = await btcRes.json();
-
-    const btcVol =
-      btcData.market_data.price_change_percentage_24h;
-
-    const stability =
-      Math.max(5, Math.min(100, Math.round(100 - vix)));
-
-    let risk = "LOW";
-
-    if (vix > 25) risk = "HIGH";
-    else if (vix > 18) risk = "MODERATE";
+    const data = await res.json();
 
     document.getElementById("stability").innerText =
-      stability + "%";
+      data.globalStability + "%";
 
     document.getElementById("risk").innerText =
-      risk;
+      data.marketRisk;
 
     document.getElementById("stockVol").innerText =
-      vix.toFixed(2);
+      data.stockVolatility;
 
     document.getElementById("cryptoVol").innerText =
-      Math.abs(btcVol).toFixed(2);
+      data.cryptoVolatility;
 
     document.getElementById("updated").innerText =
-      new Date().toLocaleString();
+      new Date(data.updated).toLocaleString();
 
   }
   catch(err) {
 
-    console.log("Dashboard error:", err);
+    console.log("Dashboard load error:", err);
 
   }
 
