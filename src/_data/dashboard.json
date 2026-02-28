@@ -1,7 +1,9 @@
 {
-  "globalStability": 68,
+  "globalStability": 80,
   "marketRisk": "MODERATE",
-  "stockVolatility": 14.23,
-  "cryptoVolatility": 28.77,
-  "latestAlert": "Markets showing increased volatility"
+  "stockVolatility": "20.00",
+  "cryptoVolatility": "3.13",
+  "latestAlert": "Bill Clinton asked about hot tub photo and testifies he knew 'nothing' of Epstein crimes",
+  "updated": "2026-02-28T06:12:45.957Z",
+  "runId": 1772259165957
 }
