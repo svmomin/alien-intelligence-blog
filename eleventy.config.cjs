@@ -1,14 +1,12 @@
-module.exports = function (eleventyConfig) {
-  eleventyConfig.addCollection("posts", (collectionApi) => {
-    return collectionApi.getFilteredByGlob("src/posts/*.md").reverse();
-  });
+module.exports = function(eleventyConfig) {
+
+  eleventyConfig.addPassthroughCopy("src/assets");
 
   return {
     dir: {
       input: "src",
-      includes: "_includes",
-      data: "_data",
-      output: "_site",
-    },
+      output: "_site"
+    }
   };
+
 };
